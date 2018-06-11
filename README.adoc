@@ -1,0 +1,48 @@
+= Fabric8 Gateway
+
+== Overview
+
+The fabric8-gateway is a PoC to see how we can automate Gateway API publishing for a bunch of API in services marked with annotation/labels.
+
+- inspired by (link:https://github.com/kubernetes/sample-controller[K8s Sample Controller])
+- following (link:https://github.com/kubernetes/community/blob/master/contributors/devel/controllers.md[Best Pactices])
+
+For the Gateway API we integrate with link:[3scale].
+
+This is very much a work in progress. Therefore a `TODO` list
+
+- [ ] expose threescale API to custom controller
+- [ ] filter to select only annotated DC
+- [ ] e2e example, in link:/example[/example] define one microservice exposing one CRUD API with a swagger definition
+- [ ] introduce link:https://github.com/golang/dep[Dep] Gopkg.toml for clean dep
+- [ ] makefile, build: run test
+- [ ] makefile, dev-deployment on minishift: docker build, kedge temple, push to minishift. One central repo with link:https://github.com/xcoulon/fabric8-minishift[Xavier's minishift repo]
+- [ ] makefile, ops-deployment on OS: the real stuff with secret, CI/CD integration
+- [ ] explore operator (required OS v3.9+)
+
+== Build & Run in dev mode
+
+==== Pre-requisites
+
+Have the following installed on your machine:
+
+* `go` Install link:https://golang.org/dl/[GoLang from 1.9+], set the environment variable `GOPATH`.
+* link:https://github.com/golang/dep[Dep the go dependencies mgt], see link:https://golang.github.io/dep/docs/installation.html[isntall guide]
+
+==== Get the code
+
+```sh
+$ git clone https://github.com/corinnekrych/fabric8-gateway $GOPATH/src/github.com/corinnekrych/fabric8-gateway
+```
+
+==== Build
+
+[source,shell]
+----
+$ go get ./...
+$ go build ./...
+$ go install ./...
+$ go run main.go -kubeconfig=$HOME/.kube/config -project=fabric8
+----
+
+== e2e testing
