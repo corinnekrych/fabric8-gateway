@@ -1,14 +1,12 @@
 package controller
 
 import (
-	"k8s.io/client-go/kubernetes"
+	openshfitclient "github.com/openshift/client-go/apps/clientset/versioned"
+	"github.com/openshift/api/apps/v1"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/apimachinery/pkg/util/runtime"
-	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	//appslisters "k8s.io/client-go/listers/apps/v1"
-	//appsinformers "k8s.io/client-go/informers/apps/v1"
 	appslisters "github.com/openshift/client-go/apps/listers/apps/v1"
 	appsinformers "github.com/openshift/client-go/apps/informers/externalversions/apps/v1"
 	"github.com/golang/glog"
@@ -20,7 +18,7 @@ import (
 // Controller is the controller watching Deployment
 type Controller struct {
 	// client is a standard kubernetes client
-	client kubernetes.Interface
+	client openshfitclient.Interface
 	// threescaleClient is the client API for 3scale REST API
 	//threescaleClient clientset.Interface
 
@@ -34,9 +32,9 @@ type Controller struct {
 
 // GatewayController returns a new controller that watch deployment and genrate Gateway API.
 func GatewayController(
-	client kubernetes.Interface,
+	client openshfitclient.Interface,
 	//threescaleClient clientset.Interface,
-	//deploymentInformer appsinformers.DeploymentInformer) *Controller {
+
 	deploymentInformer appsinformers.DeploymentConfigInformer) *Controller {
 
 	controller := &Controller{
@@ -45,7 +43,6 @@ func GatewayController(
 		deploymentsLister: deploymentInformer.Lister(),
 		deploymentsSynced: deploymentInformer.Informer().HasSynced,
 		workqueue:         workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "GatewayQueue"),
-		//recorder:          recorder,
 	}
 
 	glog.Info("--> Instantiate Setting up event handlers")
@@ -56,15 +53,15 @@ func GatewayController(
 		// UpdateFunc is also called when a re-synchronization happens, and it gets called even if nothing changes.
 		UpdateFunc: func(old, new interface{}) {
 			glog.Info("--> GatewayController::deploymentInformer::UpdateFunc\n")
-			newDepl := new.(*appsv1.Deployment)
-			oldDepl := old.(*appsv1.Deployment)
+			newDepl := new.(*v1.DeploymentConfig)
+			oldDepl := old.(*v1.DeploymentConfig)
 			if newDepl.ResourceVersion == oldDepl.ResourceVersion {
 				// Periodic resync will send update events for all known Deployments.
 				// Two different versions of the same Deployment will always have different RVs.
-				glog.Infof("--> GatewayController::deploymentInformer::Same version %s of Deployments of %s ...\n", oldDepl.ResourceVersion, oldDepl.Name)
+				glog.Infof("--> GatewayController::deploymentInformer::Same version %s of DeploymentConfig of %s ...\n", oldDepl.ResourceVersion, oldDepl.Name)
 				return
 			}
-			glog.Infof("--> GatewayController::deploymentInformer::NEW version %s, OLD verion %sof Deployment of %s...\n", newDepl.ResourceVersion, oldDepl.ResourceVersion, newDepl.Name)
+			glog.Infof("--> GatewayController::deploymentInformer::NEW version %s, OLD verion %sof DeploymentConfig of %s...\n", newDepl.ResourceVersion, oldDepl.ResourceVersion, newDepl.Name)
 			controller.handleObject(new)
 		},
 		DeleteFunc: controller.handleObject,

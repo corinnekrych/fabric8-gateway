@@ -24,7 +24,6 @@
 #   go-tests = true
 #   unused-packages = true
 
-
 [[constraint]]
   branch = "master"
   name = "github.com/golang/glog"
@@ -34,11 +33,11 @@
   version = "3.9.0"
 
 [[constraint]]
-  branch = "master"
+  branch = "release-1.9"
   name = "k8s.io/api"
 
 [[constraint]]
-  branch = "master"
+  branch = "release-1.9"
   name = "k8s.io/apimachinery"
 
 [[constraint]]
