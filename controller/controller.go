@@ -7,8 +7,10 @@ import (
 	"k8s.io/apimachinery/pkg/util/runtime"
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	appslisters "k8s.io/client-go/listers/apps/v1"
-	appsinformers "k8s.io/client-go/informers/apps/v1"
+	//appslisters "k8s.io/client-go/listers/apps/v1"
+	//appsinformers "k8s.io/client-go/informers/apps/v1"
+	appslisters "github.com/openshift/client-go/apps/listers/apps/v1"
+	appsinformers "github.com/openshift/client-go/apps/informers/externalversions/apps/v1"
 	"github.com/golang/glog"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"time"
@@ -22,7 +24,7 @@ type Controller struct {
 	// threescaleClient is the client API for 3scale REST API
 	//threescaleClient clientset.Interface
 
-	deploymentsLister appslisters.DeploymentLister
+	deploymentsLister appslisters.DeploymentConfigLister
 	deploymentsSynced cache.InformerSynced
 
 	// workqueue is a rate limited work queue.
@@ -34,17 +36,8 @@ type Controller struct {
 func GatewayController(
 	client kubernetes.Interface,
 	//threescaleClient clientset.Interface,
-	deploymentInformer appsinformers.DeploymentInformer) *Controller {
-
-	// Create event broadcaster
-	// Add sample-controller types to the default Kubernetes Scheme so Events can be
-	// logged for sample-controller types.
-	//samplescheme.AddToScheme(scheme.Scheme)
-	//glog.V(4).Info("Creating event broadcaster")
-	//eventBroadcaster := record.NewBroadcaster()
-	//eventBroadcaster.StartLogging(glog.Infof)
-	//eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: kubeclientset.CoreV1().Events("")})
-	//recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
+	//deploymentInformer appsinformers.DeploymentInformer) *Controller {
+	deploymentInformer appsinformers.DeploymentConfigInformer) *Controller {
 
 	controller := &Controller{
 		client:     client,
@@ -68,10 +61,10 @@ func GatewayController(
 			if newDepl.ResourceVersion == oldDepl.ResourceVersion {
 				// Periodic resync will send update events for all known Deployments.
 				// Two different versions of the same Deployment will always have different RVs.
-				glog.Infof("--> GatewayController::deploymentInformer::Same version of Deployment OLD=%s AND NEW=%s...\n", oldDepl.Name, newDepl.Name)
+				glog.Infof("--> GatewayController::deploymentInformer::Same version %s of Deployments of %s ...\n", oldDepl.ResourceVersion, oldDepl.Name)
 				return
 			}
-			glog.Infof("--> GatewayController::deploymentInformer::Different version of Deployment OLD=%s AND NEW=%s...\n", oldDepl.Name, newDepl.Name)
+			glog.Infof("--> GatewayController::deploymentInformer::NEW version %s, OLD verion %sof Deployment of %s...\n", newDepl.ResourceVersion, oldDepl.ResourceVersion, newDepl.Name)
 			controller.handleObject(new)
 		},
 		DeleteFunc: controller.handleObject,
