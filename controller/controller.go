@@ -52,17 +52,29 @@ func GatewayController(
 		// UpdateFunc is called when an existing resource is modified.
 		// UpdateFunc is also called when a re-synchronization happens, and it gets called even if nothing changes.
 		UpdateFunc: func(old, new interface{}) {
-			glog.Info("--> GatewayController::deploymentInformer::UpdateFunc\n")
+			//glog.Info("--> GatewayController::deploymentInformer::UpdateFunc\n")
 			newDepl := new.(*v1.DeploymentConfig)
 			oldDepl := old.(*v1.DeploymentConfig)
-			if newDepl.ResourceVersion == oldDepl.ResourceVersion {
-				// Periodic resync will send update events for all known Deployments.
-				// Two different versions of the same Deployment will always have different RVs.
-				glog.Infof("--> GatewayController::deploymentInformer::Same version %s of DeploymentConfig of %s ...\n", oldDepl.ResourceVersion, oldDepl.Name)
+			var foundDeploymentFinishedCondition *v1.DeploymentCondition
+			if newDepl.ResourceVersion == oldDepl.ResourceVersion { // no changes, do nothing
+				glog.Infof("--> GatewayController::deploymentInformer::Same ResourceRevision %s of DeploymentConfig of %s with version %d ...\n", oldDepl.ResourceVersion, oldDepl.Name, newDepl.Status.LatestVersion)
 				return
+			} else { // there are some changes in DC
+				deploymentConditions := newDepl.Status.Conditions
+				for _, v := range deploymentConditions {
+					if v.Reason == "NewReplicationControllerAvailable" {
+						foundDeploymentFinishedCondition = &v
+					}
+				}
+				// if the message is sent that "replication controller successfully rolled out" and this is really about the latest generation.
+				if foundDeploymentFinishedCondition != nil && newDepl.ObjectMeta.Generation == newDepl.Status.ObservedGeneration {
+					glog.Infof("--> GatewayController::deploymentInformer::Going to version %d with generation %d of %s\n", newDepl.Status.LatestVersion, newDepl.ObjectMeta.Generation, newDepl.ObjectMeta.Name)
+					glog.Infof("--> NEW version of DC is %#v \n", newDepl)
+					controller.handleObject(new)
+				}
 			}
-			glog.Infof("--> GatewayController::deploymentInformer::NEW version %s, OLD verion %sof DeploymentConfig of %s...\n", newDepl.ResourceVersion, oldDepl.ResourceVersion, newDepl.Name)
-			controller.handleObject(new)
+
+
 		},
 		DeleteFunc: controller.handleObject,
 	})
