@@ -54,3 +54,16 @@ $ go run main.go -kubeconfig=$HOME/.kube/config -project=fabric8
 The project should use `DeploymentConfig`.
 See [fabric8-toggle template](https://github.com/corinnekrych/fabric8-toggles-service/blob/d3c2a4843b154ba9b9342dcb41bef8028fc1d10c/toggles-service-os.yml)
 Follow [deployment instruction](https://github.com/corinnekrych/fabric8-toggles-service/tree/threescale.trial#docker-build).
+
+* trigger a new deployment (here manually)
+```
+$ oc rollout latest dc/toggles-service
+ ```
+
+see Gateway trace:
+```
+I0613 18:20:59.572947   92567 controller.go:71] --> GatewayController::deploymentInformer::Going to version 30 with generation 36 of toggles-service
+I0613 18:20:59.572975   92567 controller.go:72] --> NEW version of DC is &v1.DeploymentConfig{TypeMeta:v1.TypeMeta{Kind:"",
+I0613 18:20:59.575311   92567 controller.go:166] --> In Controller::handleObject
+I0613 18:20:59.575327   92567 controller.go:182] --------> Processing object: toggles-service
+```
