@@ -111,7 +111,7 @@ curl -v  -X GET "https://redhatopenshiftio-admin.3scale.net/admin/api/services/2
 curl -v  -X POST "https://redhatopenshiftio-admin.3scale.net/admin/api/services/2555417758668/application_plans.xml" -d 'access_token=XXX&name=otherbasic2&system_name=otherbasic2&state_event=publish'
 ```
 
-```
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <plan custom="false" default="false">
   <id>2357355951501</id>
@@ -133,7 +133,7 @@ curl -v  -X POST "https://redhatopenshiftio-admin.3scale.net/admin/api/services/
 curl -v  -X GET "https://redhatopenshiftio-admin.3scale.net/admin/api/services/2555417758668/application_plans.xml?access_token=XXX"
 ```
 
-```
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <plans>
   <plan custom="false" default="false">
@@ -154,26 +154,48 @@ curl -v  -X GET "https://redhatopenshiftio-admin.3scale.net/admin/api/services/2
 
 ## CREATE application
 ```
-curl -v  -X POST "https://corinne-admin.3scale.net/admin/api/accounts/2445582058137/applications.xml" -d 'access_token=XXX&plan_id=2357355951501&name=corinneapp&description=description'
+curl -v  -X POST "https://redhatopenshiftio-admin.3scale.net/admin/api/accounts/2445582556479/applications.xml" -d 'access_token=XXX&plan_id=2357355951501&name=appf8test&description=appf8test'
 ```
 
-403
+> NOTE: __do not used the account_id returned by the create service. The developer_id should be known (param of the script)__.
+>The account_id returned from the service create is the one that the service belongs to (The tenant)
+> - Service belongs to a Tenant (account), for all the services created under the same domain it will always return the same `account_id`
+> - Developers (account) can subscribe to a Service by creating an application.
+> In the UI you can go to the developer tab and that’s where you can pick the account_id
+> For automatic scripting you need to know for which developer you want to create an application
+> You can create one Developer if you do not have one from the API endpoint `Signup Express (Account create)` and use the `id` as the `account_id`
+
 
 ```
-x-runtime: 0.196748
-date: Thu, 14 Jun 2018 14:31:02 GMT
-content-encoding: gzip
-x-content-type-options: nosniff
-x-frame-options: DENY
-connection: keep-alive
-content-type: application/xml; charset=utf-8
-cache-control: no-cache
-strict-transport-security: max-age=15552000
-vary: Accept-Encoding
-content-length: 122
-x-xss-protection: 1; mode=block
-x-request-id: 784faef0-8e16-4eb6-ab05-34142495183f
-x-served-by: mt05
+<?xml version="1.0" encoding="UTF-8"?>
+<application>
+  <id>1409617773838</id>
+  <created_at>2018-06-15T07:10:49Z</created_at>
+  <updated_at>2018-06-15T07:10:49Z</updated_at>
+  <state>live</state>
+  <user_account_id>2445582556479</user_account_id>
+  <first_traffic_at/>
+  <first_daily_traffic_at/>
+  <end_user_required>false</end_user_required>
+  <service_id>2555417758668</service_id>
+  <user_key>USER_KEY</user_key>
+  <provider_verification_key>PROVIDER_KY</provider_verification_key>
+  <plan custom="false" default="false">
+    <id>2357355951501</id>
+    <name>otherbasic2</name>
+    <type>application_plan</type>
+    <state>published</state>
+    <service_id>2555417758668</service_id>
+    <end_user_required>false</end_user_required>
+    <setup_fee>0.0</setup_fee>
+    <cost_per_month>0.0</cost_per_month>
+    <trial_period_days/>
+    <cancellation_period>0</cancellation_period>
+  </plan>
+  <name>appf8test</name>
+  <description>appf8test</description>
+  <extra_fields></extra_fields>
+</application>
 ```
 
 
